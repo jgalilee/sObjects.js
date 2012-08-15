@@ -102,6 +102,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bundler (= 1.1.5)
   coffee-rails (~> 3.2.1)
   jquery-rails
   rails (= 3.2.8)
