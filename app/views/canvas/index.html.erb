@@ -1,0 +1,21 @@
+<div id="page">
+  <div id="content">
+    <div id="header">
+      <h1>Canvas Ruby Test</h1>
+      <h2>Welcome to the Canvas Test Page.</h2>
+    </div>
+    <div id="canvas-content">
+        <div>
+            Paste a sample signed request in the text area below:
+        </div>
+        <div>
+        <%= form_tag '/canvas' do %>
+		  <%= text_area_tag 'signed_request',nil,:rows => 20,:cols => 80 %>
+		  <%= submit_tag 'Submit' %>
+        <% end %>
+        </div>
+    </div>
+  </div>
+`
+  <div id="footer">&nbsp;</div>
+</div>
