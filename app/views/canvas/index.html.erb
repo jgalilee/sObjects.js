@@ -27,19 +27,17 @@ POSSIBILITY OF SUCH DAMAGE.
 <div id="page">
   <div id="content">
     <div id="header">
-      <h1>Canvas Ruby Test</h1>
-      <h2>Welcome to the Canvas Test Page.</h2>
+      <h1>Congratulations!</h1>
     </div>
     <div id="canvas-content">
-        <div>
-            Paste a sample signed request in the text area below:
-        </div>
-        <div>
-        <%= form_tag '/canvas' do %>
-		  <%= text_area_tag 'signed_request',nil,:rows => 20,:cols => 80 %>
-		  <%= submit_tag 'Submit' %>
-        <% end %>
-        </div>
+        <h2>
+            <br/>
+            Your Heroku Ruby on Rails application is up and running.
+            To see Canvas Framework specific functionality, please use this app in a Salesforce Platform
+            Connect enabled organization.
+            <p/>If you are seeing this page inside of an app within Salesforce,
+            you must set the "Access Method" for the application to "Signed Request (POST)".
+        </h2>
     </div>
   </div>
 `

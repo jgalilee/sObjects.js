@@ -35,8 +35,7 @@ class CanvasController < ApplicationController
 
     # Retrieve consumer secret from environment
     secret = ENV["CANVAS_CONSUMER_SECRET"]
-    raise "No consumer secret found in environment." if secret.blank?()
-
+    raise "No consumer secret found in environment [CANVAS_CONSUMER_SECRET]." if secret.blank?()
 
     # Construct the signed request helper
     srHelper = SignedRequest.new(secret,@sr)
