@@ -23,6 +23,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 CanvasRuby::Application.routes.draw do
+  root :to => "canvas#index"
   get "canvas" => "canvas#index"
   post "canvas" => "canvas#post"
   get "callback" => "static#callback"
