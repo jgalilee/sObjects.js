@@ -69,7 +69,7 @@ a:hover {
 }
 
 #header {
-    background-image: url("/assets/rails.png");
+    background-image: url("/assets/logo.png");
     background-repeat: no-repeat;
     background-position: top left;
     height: 64px
