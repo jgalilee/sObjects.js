@@ -34,7 +34,7 @@ class SignedRequest
 
   # Validates the signed request by verifying the key, then returns
   # the json string.
-  def unsign()
+  def  verifyAndDecode()
 
     # Validate secret and signed request string.
     raise "Consumer secret not set." if @consumerSecret.blank?()

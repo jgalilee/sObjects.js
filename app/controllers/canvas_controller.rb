@@ -40,8 +40,8 @@ class CanvasController < ApplicationController
     # Construct the signed request helper
     srHelper = SignedRequest.new(secret,@sr)
 
-    # Unsign the signed request.
-    @canvasRequestJson = srHelper.unsign()
+    # Verify and decode the signed request.
+    @canvasRequestJson = srHelper.verifyAndDecode()
 
   end
 
