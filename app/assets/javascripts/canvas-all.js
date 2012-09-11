@@ -23,7 +23,6 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 (function (global) {
 
     "use strict";
@@ -48,7 +47,7 @@
 
             // type utilities
             //---------------
-
+            
             /**
             * @description Checks whether an object contains an uninherited property.
             * @param {Object} obj The object to check
@@ -58,7 +57,7 @@
             hasOwn: function (obj, prop) {
                 return oproto.hasOwnProperty.call(obj, prop);
             },
-
+            
             /**
             * @description Checks whether an object is currently undefined.
             * @param {Object} value The object to check
@@ -68,7 +67,7 @@
                 var undef;
                 return value === undef;
             },
-
+            
             /**
             * @description Checks whether object is undefined, null, or an empty string.
             * @param {Object} value The object to check
@@ -77,7 +76,7 @@
             isNil: function (value) {
                 return $.isUndefined(value) || value === null || value === "";
             },
-
+            
             /**
             * @description Checks whether a value is a number. This function doesn't resolve strings to numbers.
             * @param {Object} value Object to check
@@ -95,7 +94,7 @@
             isFunction: function (value) {
                 return !!(value && value.constructor && value.call && value.apply);
             },
-
+            
             /**
             * @description Checks whether an object is an array.
             * @param {Object} value The object to check
@@ -105,17 +104,16 @@
             isArray: Array.isArray || function (value) {
                 return oproto.toString.call(value) === '[object Array]';
             },
-
+            
             /**
             * @description Checks whether an object is the argument set for a function
             * @param {Object} value The object to check
             * @returns {Boolean} <code>true</code> if the object or value is the argument set for a function, otherwise <code>false</code>
             */
             isArguments: function (value) {
-                // @todo does this still work in strict mode?
                 return !!(value && $.hasOwn(value, 'callee'));
             },
-
+            
             /**
             * @description Checks whether the value is of type 'object' and is not null.
             * @param {Object} value The object to check
@@ -127,14 +125,14 @@
 
             // common functions
             //-----------------
-
+            
             /**
-            * @description An empty or blank function.
+            * @description An empty or blank function.  
             */
             nop: function () {
                 /* no-op */
             },
-
+            
             /**
             * @description This function runs the function that is passed to it.
             * @param {Function} fn The function to run
@@ -144,7 +142,7 @@
                     fn();
                 }
             },
-
+            
             /**
             * @description This function always returns the argument.
             * @param {Object} obj The object to return, untouched.
@@ -157,7 +155,7 @@
             // @todo consider additional tests for: null, boolean, string, nan, element, regexp... as needed
             /**
             * @description Calls a defined function for each element in an object
-            * @param {Object} obj The object to loop through.
+            * @param {Object} obj The object to loop through.  
                 It can be an array, an array like object or a map of properties
             * @param {Function} it The callback function to run for each element.
             * @param {Object} [ctx] The context object to be used for the callback function.
@@ -172,9 +170,8 @@
                 ctx = ctx || obj;
                 // @todo: looks like native method will not break on return false; maybe throw breaker {}
                 if (nativ && nativ === obj.forEach) {
-                    obj.forEach(it, ctx);  // obj is an Array with its own "forEach" function
+                    obj.forEach(it, ctx);
                 }
-                // @todo should we check $.isArray(obj) too?  A Snake object with length=3 will pass this test:
                 else if ($.isNumber(l)) { // obj is an array-like object
                     while (i < l) {
                         if (it.call(ctx, obj[i], i, obj) === false) {
@@ -183,7 +180,7 @@
                         i += 1;
                     }
                 }
-                else {  // obj is not array-like, it is a map of properties
+                else {
                     for (key in obj) {
                         if ($.hasOwn(obj, key) && it.call(ctx, obj[key], key, obj) === false) {
                             return;
@@ -191,7 +188,7 @@
                     }
                 }
             },
-
+            
             /**
             * @description Creates a new array with the results of calling the
                 function on each element in the object.
@@ -216,8 +213,8 @@
                 });
                 return results;
             },
-
-            /**
+            
+            /** 
             * @description Creates an array containing all the elements of the given object
             * @param {Object} obj The object the use in creating the array
             * @returns {Array} An array containing all the elements in the object.
@@ -225,11 +222,11 @@
             values: function (obj) {
                 return $.map(obj, $.identity);
             },
-
+            
             /**
             * @description Creates a new array containing the selected elements of the given array.
             * @param {Array} array The array to subset.
-            * @param {Integer} [begin=0] The index that specifies where to start the selection.
+            * @param {Integer} [begin=0] The index that specifies where to start the selection. 
             * @param {Integer} [end = array.length] The index that specifies where to end the selection.
             * @returns {Array} A new array that contains the selected elements.
             */
@@ -258,7 +255,7 @@
                 }
                 return $.values(iterable);
             },
-
+            
             /**
             * @description Calculates the number of elements in an object
             * @param {Object} obj The object to size.
@@ -267,14 +264,14 @@
             size: function (obj) {
                 return $.toArray(obj).length;
             },
-
+            
             /**
             * @description Calculates the location of an element in an array.
             * @param {Array} array The array to check.
             * @param {Object} item The item to search for within the array.
-            * @returns {Integer} The index of the element within the array.
+            * @returns {Integer} The index of the element within the array.  
                 Returns -1 if the element is not found.
-            */
+            */            
             indexOf: function (array, item) {
                 var nativ = aproto.indexOf, i, l;
                 if (!array) {
@@ -290,7 +287,7 @@
                 }
                 return -1;
             },
-
+            
             /**
             * @description Removes an element from an array.
             * @param {Array} array The array to modify.
@@ -304,11 +301,11 @@
             },
 
             /**
-            * @description Serializes an object into a string that can be used as a URL query string.
-            * @param {Object|Array} a The array or object to serialize.
-            * @param {Boolean} [encode=false] Indicates that the string should be encoded.
-            * @returns {String} A string representing the object as a URL query string.
-            */
+             * @description Serializes an object into a string that can be used as a URL query string.
+             * @param {Object|Array} a The array or object to serialize.
+             * @param {Boolean} [encode=false] Indicates that the string should be encoded.
+             * @returns {String} A string representing the object as a URL query string.
+             */
             param: function (a, encode) {
                 var s = [];
 
@@ -347,18 +344,8 @@
                 return s.join("&").replace(/%20/g, "+");
             },
 
-
             // strings
             //--------
-            /**
-            * @description Removes whitespace from the beginning and end of a string.
-            * @param {String} str The string to trim.
-            * @returns {String} A new string without leading or trailing whitespace.
-            */
-            trim: function (str) {
-                return str.replace(/^\s+|\s+$/g, '');
-            },
-
             /**
             * @description Adds the contents of 2 or more objets to
                 a destination object.
@@ -367,39 +354,12 @@
             * @returns {Object} The modified destination object.
             */
             extend: function (dest /*, mixin1, mixin2, ... */) {
-                $.each($.slice(arguments, 1), function (mixin, i) {  // add each arg after dest to dest as a mixin
-                    $.each(mixin, function (value, key) {  // for each property in this mixin object, add its key/value to the dest
+                $.each($.slice(arguments, 1), function (mixin, i) {
+                    $.each(mixin, function (value, key) {
                         dest[key] = value;
                     });
                 });
                 return dest;
-            },
-
-            /**
-            * @description Creates a new object, using the sire object as a prototype
-            * @param {Object} sire The object to use as a parent object.
-            * @param {Object} mixin The object to use as the child object. This object will
-                keep its original structure and be modified to extend the sire object.
-            * @returns {Object} The modified mixin object.
-            */
-            beget: function (sire, mixin) {
-                var progeny;
-                // @todo Object.create doesn't seem to be working in jsc like i'd expect; debug this
-                /* if (Object.create) {
-                 progeny = Object.create(sire, mixin);
-                 }
-                 else {
-                 */
-                function F() {
-                }
-
-                F.prototype = sire;
-                progeny = new F();
-                progeny.constructor = F;
-
-                $.extend(progeny, mixin);
-                /* } */
-                return progeny;
             },
 
             /**
@@ -410,9 +370,6 @@
             * @returns {Object} The object that is the prototype of the given object.
             */
             prototypeOf: function (obj) {
-                // @todo: What about using only obj.constructor.prototype?  (restriction would be that prototypeOf should only be used on nos2 "beget" objects?)
-                //        Native getPrototypeOf might be fast enough that it is worth keeping it?
-
                 var nativ = Object.getPrototypeOf,
                     proto = '__proto__';
                 if ($.isFunction(nativ)) {
@@ -489,50 +446,30 @@
                         return a[i].value;
                     }
                 }
-           },
-
-            browser: {
-                msie: /*@cc_on!@*/false
             }
-
-        },   // End of $
-
+        },
 
         readyHandlers = [],
 
         ready = function () {
-            ready = $.nop; // only execute once
+            ready = $.nop;
             $.each(readyHandlers, $.invoker);
-            readyHandlers = null; // release to gc
+            readyHandlers = null;
         },
         /**
-        * @description
+        * @description 
         * @param {Function} cb The function to run when ready.
         */
         canvas = function (cb) {
             if ($.isFunction(cb)) {
                 readyHandlers.push(cb);
             }
-//            else if (selector.indexOf('#') === 0) {  // naive selector support; embed a real one if requirements here get complex
-//                return $.byId(selector.slice(1));
-//            }
         };
 
-
-    // on dom ready, derived from <http://dean.edwards.name/weblog/2006/06/again/#comment367184/>
-
-    // @todo unknown if this works in IE9
     (function () {
         var ael = 'addEventListener',
             tryReady = function () {
-                if ($.browser.msie) {
-                    try {
-                        doc.body.doScroll('up'); // relying on IE to throw an error here if not ready
-                        ready();
-                    } catch(e) {
-                    }
-                }
-                else if (/loaded|complete/.test(doc.readyState)) {
+                if (/loaded|complete/.test(doc.readyState)) {
                     ready();
                 }
                 else if (readyHandlers) {
@@ -558,7 +495,7 @@
         canvas[name] = fn;
     });
 
-    if (!global.Sfdc) {
+    if (!global.Sfdc) { 
         global.Sfdc = {};
     }
 
@@ -601,7 +538,7 @@
            }
            document.cookie = name + "=" + value + expires + "; path=/" +  ((isSecure() === true) ? "; secure" : "");
        }
-
+       
        /**
        * @name Sfdc.canvas.cookies#get
        * @function
@@ -627,7 +564,7 @@
            }
            return null;
        }
-
+       
        /**
        * @name Sfdc.canvas.cookies#remove
        * @function
@@ -663,6 +600,13 @@
             instanceUrl,
             childWindow;
 
+        function init() {
+            // Get the access token from the cookie (needed to survive refresh),
+            // and then remove the cookie per security's request.
+            accessToken = $$.cookies.get("access_token");
+            $$.cookies.remove("access_token");
+        }
+
         function query(params) {
             var r = [], n;
             if (!$$.isUndefined(params)) {
@@ -680,9 +624,12 @@
         *@private
         */
         function refresh() {
+            // Temporarily set the oauth token in a cookie and then remove it
+            // after the refresh.
+            $$.cookies.set("access_token", accessToken);
             self.location.reload();
         }
-        /**
+        /** 
         * @name Sfdc.canvas.oauth#login
         * @function
         * @description Opens the OAuth popup window to retrieve an OAuth token
@@ -723,31 +670,24 @@
         /**
         * @name Sfdc.canvas.oauth#token
         * @function
-        * @description Sets, gets or removes the <code>access_token</code> cookie <br>
+        * @description Sets, gets or removes the <code>access_token</code> from this JS object <br>
             <p>This function does one of three things <br>
-            If the 't' parameter is not passed in, the current value for the <code>access_token</code> cookie is returned. <br>
-            If the the 't' parameter is null, the <code>access_token</code> cookie is removed. <br>
-            Otherwise the <code>access_token</code> cookie value is set to the 't' parameter and then returned.
-        * @param {String} [t] The oauth token to set as the <code>access_token</code> cookie
-        * @returns {String} The resulting <code>access_token</code> cookie value if set, otherwise null
+            If the 't' parameter is not passed in, the current value for the <code>access_token</code> value is returned. <br>
+            If the the 't' parameter is null, the <code>access_token</code> value is removed. <br>
+            Note: for longer term storage of the OAuth token store it server side in the session, access tokens
+            should never be stored in cookies.
+            Otherwise the <code>access_token</code>  value is set to the 't' parameter and then returned.
+        * @param {String} [t] The oauth token to set as the <code>access_token</code> value
+        * @returns {String} The resulting <code>access_token</code> value if set, otherwise null
         */
         function token(t) {
             if (arguments.length === 0) {
                 if (!$$.isNil(accessToken)) {return accessToken;}
-                accessToken = $$.cookies.get("access_token");
-            }
-            else if (t === null) {
-                $$.cookies.remove("access_token");
-                accessToken = null;
             }
             else {
-                $$.cookies.set("access_token", t);
                 accessToken = t;
             }
 
-            if (accessToken) {
-                $$.client.token(accessToken);
-            }
             return accessToken;
         }
 
@@ -810,7 +750,7 @@
                 }
             }
         }
-
+        
         /**
         * @name Sfdc.canvas.oauth#checkChildWindowStatus
         * @function
@@ -825,12 +765,12 @@
         /**
         * @name Sfdc.canvas.oauth#childWindowUnloadNotification
         * @function
-        * @description Parses the hash value that is passed in and sets the
-            <code>access_token</code> and <code>instance_url</code> cookies if they exist.  Use during
+        * @description Parses the hash value that is passed in and sets the 
+            <code>access_token</code> and <code>instance_url</code> cookies if they exist.  Use during 
             User-Agent OAuth Authentication Flow to pass the OAuth token
-        * @param {String} hash Typically a string of key-value pairs delimited by
-            the ampersand character.
-        * @example
+        * @param {String} hash Typically a string of key-value pairs delimited by 
+            the ampersand character.  
+        * @example 
         * Sfdc.canvas.oauth.childWindowUnloadNotification(self.location.hash);
         */
         function childWindowUnloadNotification(hash) {
@@ -842,35 +782,37 @@
             parseHash(hash);
             setTimeout(window.Sfdc.canvas.oauth.checkChildWindowStatus, 50);
         }
-
+        
         /**
         * @name Sfdc.canvas.oauth#logout
         * @function
-        * @description Removes the <code>access_token</code> cookie and refreshes the browser.
+        * @description Removes the <code>access_token</code> oauth token from this object.
         */
         function logout() {
-            // Remove the cookie and refresh the browser
+            // Remove the oauth token and refresh the browser
             token(null);
             var home = $$.cookies.get("home");
             window.location = home || window.location;
         }
-
+        
         /**
         * @name Sfdc.canvas.oauth#loggedin
         * @function
         * @description Returns the login state
-        * @returns {Boolean} <code>true</code> if the <code>access_token</code> cookie is set, otherwise <code>false</code>
+        * @returns {Boolean} <code>true</code> if the <code>access_token</code> is available in this JS object.
+        * Note: <code>access tokens</code> (i.e. OAuth tokens) should be stored server side for more durability.
+         * Never store OAuth tokens in cookies as this can lead to a security risk.
         */
         function loggedin() {
             return !$$.isNil(token());
         }
-
+        
         /**
         * @name Sfdc.canvas.oauth#loginUrl
         * @function
         * @description Calculates and returns the url for the OAuth authorization service
-        * @returns {String} The url for the OAuth authorization service or null if there is
-            not a value for loginUrl in the current url's query string.
+        * @returns {String} The url for the OAuth authorization service or null if there is 
+        *   not a value for loginUrl in the current url's query string.
         */
         function loginUrl() {
             var i, nvs, nv, q = self.location.search;
@@ -891,6 +833,7 @@
         }
 
         return {
+             init : init,
              login : login,
              logout : logout,
              loggedin : loggedin,
@@ -904,9 +847,9 @@
 
     $$.module('Sfdc.canvas.oauth', module);
 
-}(Sfdc.canvas));
-// concept lifted from Josh Fraser - http://www.onlineaspect.com/2010/01/15/backwards-compatible-postmessage
-/**
+    $$.oauth.init();
+
+}(Sfdc.canvas));/**
 *@namespace Sfdc.canvas.xd
 *@name Sfdc.canvas.xd
 */
@@ -920,7 +863,7 @@
         /**
         * @lends Sfdc.canvas.xd
         */
-
+        
         /**
         * @name Sfdc.canvas.xd#post
         * @function
@@ -930,23 +873,21 @@
         * @param {String} [target] The window that is the message's target. Defaults to the parent of the current window.
         */
         function postMessage(message, target_url, target) {
-            if (!target_url) {
-                return;
-            }
+
+            // strip  out just the {scheme}://{host}:{port} - remove any path and query string information
+            var otherWindow = (target_url) ? target_url.replace( /([^:]+:\/\/[^\/]+).*/, '$1') : "*";
             target = target || parent;  // default to parent
             if (window.postMessage) {
                 // the browser supports window.postMessage, so call it with a targetOrigin
                 // set appropriately, based on the target_url parameter.
-
-                // strip  out just the {scheme}://{host}:{port} - remove any path and query string information
-                target.postMessage(message, target_url.replace( /([^:]+:\/\/[^\/]+).*/, '$1'));
+                target.postMessage(message, otherWindow);
             }
         }
-
+        
         /**
         * @name Sfdc.canvas.xd#receive
         * @function Runs the callback function when the message event is received.
-        * @param {Function} callback Function to run when the message event is received
+        * @param {Function} callback Function to run when the message event is received 
             if the event origin is acceptable.
         * @param {String} source_origin The origin of the desired events
         */
@@ -971,12 +912,12 @@
                 }
             }
         }
-
+        
         /**
         * @name Sfdc.canvas.xd#remove
         * @function
         * @description Removes the message event listener
-        * @public
+        * @public     
         */
         function removeListener() {
 
@@ -1007,9 +948,9 @@
 
     "use strict";
 
-
+    
     var module =   (function() /**@lends module */ {
-
+        
         var purl, cbs = {}, seq = 0;
         /**
         * @description
@@ -1017,8 +958,13 @@
         * @returns The url of the Parent Window
         */
         function getParentUrl() {
-            // This relies on the parent passing it in.
-            purl = purl || decodeURIComponent(document.location.hash.replace(/^#/, ''));
+            // This relies on the parent passing it in. If it doesn't we can still recover.
+            if (purl) {return purl;}
+            var h = document.location.hash;
+            if (h) {
+                h = decodeURIComponent(h.replace(/^#/, ''));
+                purl = (h.substring(0, 4) === "http") ? h : null;
+            }
             return purl;
         }
 
@@ -1061,10 +1007,10 @@
         * @name Sfdc.canvas.client#ctx
         * @function
         * @param {Function} clientscb Callback function to run when the call to ctx is complete
-        * @param {String} token OAuth token to send.
+        * @param {String} token OAuth token to send. 
         * @example
         * // Gets context in the canvas app.
-        *
+        * 
         * function callback(msg) {
         *   if (msg.status !== 200) {
         *     alert("Error: " + msg.status);
@@ -1082,12 +1028,12 @@
             token = token || $$.oauth.token();
             postit(clientscb, {type : "ctx", accessToken : token});
         }
-
+        
         /**
-        * @description Perform a cross-domain, asynchronous HTTP request.
+        * @description Perform a cross-domain, asynchronous HTTP request.  
             <br>Note:  this should not be used for same domain requests.
         * @param {String} url The URL to which the request is sent
-        * @param {Object} settings A set of key/value pairs to configure the request.
+        * @param {Object} settings A set of key/value pairs to configure the request.  
             <br>The success setting is required at minimum and should be a callback function
         * @name Sfdc.canvas.client#ajax
         * @function
@@ -1106,7 +1052,7 @@
         *     success : function(data) {
         *     if (201 === data.status) {
         *          alert("Success"
-        *          }
+        *          } 
         *     }
         *   });
         * @example
@@ -1157,7 +1103,7 @@
         }
 
         function token(t) {
-            postit(null, {type : "token", accessToken : t});
+            $$.oauth.token(t);
         }
 
         $$.xd.receive(callbacker, getParentUrl());
