@@ -71,7 +71,7 @@ You can force sObjects to load by calling the load function.
 
 ````js
 sObjects.Account.load(function() {
-  console.log('sObjects.Account finished loading);
+  console.log('sObjects.Account finished loading');
 }
 ````
 
