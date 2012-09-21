@@ -26,9 +26,15 @@ QueryBuilder.prototype._bindValues = function(items, seperator) {
   return this._bindSyntax(parsedValues);
 }
 
-QueryBuilder.prototype.find = function(fields) {
+QueryBuilder.prototype.select = function(fields) {
   return this._bindSyntax('SELECT').
     _bindValues(fields);
+}
+
+QueryBuilder.prototype.subSelect = function(func) {
+  return this._bindSyntax('(').
+    _bindSyntax(func(new QueryBuilder()).finish()).
+    _bindSyntax(')');
 }
 
 QueryBuilder.prototype.from = function(name) {

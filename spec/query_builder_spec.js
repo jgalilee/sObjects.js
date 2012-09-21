@@ -2,36 +2,57 @@ describe('QueryBuilder', function() {
 
   subject = new QueryBuilder();
 
-  describe('.find([0..n])', function() {
+  describe('.select([0..n])', function() {
 
-    it('creates a find query with no columns', function() {
+    it('creates a select query with no columns', function() {
       expect(subject.
-        find([]).
+        select([]).
         finish()).
       toEqual('SELECT');
     });
 
-    it('creates a find query with one column, without a seperator', function() {
+    it('creates a select query with one column, without a seperator', function() {
       expect(subject.
-        find(['Name']).
+        select(['Name']).
         finish()).
       toEqual('SELECT Name');
     });
 
-    it('creates a find query with two columns, with a comma seperator', function() {
+    it('creates a select query with two columns, with a comma seperator', function() {
       expect(subject.
-        find(['Id', 'Name']).
+        select(['Id', 'Name']).
         finish()).
       toEqual('SELECT Id, Name');
+    });
+
+    it('creates a query with a single sub query', function() {
+      expect(subject.
+        select(['Id', 'Name']).subSelect(function(queryBuilder) {
+          queryBuilder.select(['PostCode']);
+          return queryBuilder;
+        }).
+        finish()).
+      toEqual('SELECT Id, Name ( SELECT PostCode )');
+    });
+
+    it('creates a query with multiple sub queries', function() {
+      expect(subject.
+        select(['Id', 'Name']).subSelect(function(q1) {
+          return q1.select(['PostCode']).subSelect(function(q2) {
+            return q2.select(['City', 'State', 'Country']);
+          })
+        }).
+        finish()).
+      toEqual('SELECT Id, Name ( SELECT PostCode ( SELECT City, State, Country ) )');
     });
 
   });
 
   describe('.from(name)', function() {
 
-    it('creates a find query taken from a specified table', function() {
+    it('creates a select query taken from a specified table', function() {
       expect(subject.
-        find(['Id', 'Name']).
+        select(['Id', 'Name']).
         from('Contact').
         finish()).
       toEqual('SELECT Id, Name FROM Contact');
@@ -43,9 +64,9 @@ describe('QueryBuilder', function() {
 
     describe('.equals(value)', function() {
 
-      it('creates a find query taken from a specified table, with a single condition on a column', function() {
+      it('creates a select query taken from a specified table, with a single condition on a column', function() {
         expect(subject.
-          find(['Id', 'FirstName', 'LastName']).
+          select(['Id', 'FirstName', 'LastName']).
           from('Contact').
           where('FirstName').equal('Joe').
           finish()).
@@ -54,9 +75,9 @@ describe('QueryBuilder', function() {
 
       describe('.and(value)', function() {
 
-        it('creates a find query taken from a specified table, with multiple conditions on multiple columns', function() {
+        it('creates a select query taken from a specified table, with multiple conditions on multiple columns', function() {
           expect(subject.
-            find(['Id', 'FirstName', 'LastName']).
+            select(['Id', 'FirstName', 'LastName']).
             from('Contact').
             where('FirstName').equal('Joe').
             and('LastName').equal('Bloggs').
@@ -68,9 +89,9 @@ describe('QueryBuilder', function() {
 
       describe('.or(value)', function() {
 
-        it('creates a find query taken from a specified table, with multiple conditions on multiple columns', function() {
+        it('creates a select query taken from a specified table, with multiple conditions on multiple columns', function() {
           expect(subject.
-            find(['Id', 'FirstName', 'LastName']).
+            select(['Id', 'FirstName', 'LastName']).
             from('Contact').
             where('FirstName').equal('Joe').
             or('LastName').equal('Bloggs').
@@ -84,9 +105,9 @@ describe('QueryBuilder', function() {
 
     describe('.notEqual(value)', function() {
 
-      it('creates a find query taken from a specified table, with a single condition on a column', function() {
+      it('creates a select query taken from a specified table, with a single condition on a column', function() {
         expect(subject.
-          find(['Id', 'FirstName', 'LastName']).
+          select(['Id', 'FirstName', 'LastName']).
           from('Contact').
           where('FirstName').notEqual('Joe').
           finish()).
@@ -95,9 +116,9 @@ describe('QueryBuilder', function() {
 
       describe('.and(value)', function() {
 
-        it('creates a find query taken from a specified table, with multiple conditions on multiple columns', function() {
+        it('creates a select query taken from a specified table, with multiple conditions on multiple columns', function() {
           expect(subject.
-            find(['Id', 'FirstName', 'LastName']).
+            select(['Id', 'FirstName', 'LastName']).
             from('Contact').
             where('FirstName').notEqual('Joe').
             and('LastName').equal('Bloggs').
@@ -109,9 +130,9 @@ describe('QueryBuilder', function() {
 
       describe('.or(value)', function() {
 
-        it('creates a find query taken from a specified table, with multiple conditions on multiple columns', function() {
+        it('creates a select query taken from a specified table, with multiple conditions on multiple columns', function() {
           expect(subject.
-            find(['Id', 'FirstName', 'LastName']).
+            select(['Id', 'FirstName', 'LastName']).
             from('Contact').
             where('FirstName').notEqual('Joe').
             or('LastName').equal('Bloggs').
@@ -125,9 +146,9 @@ describe('QueryBuilder', function() {
 
     describe('.isNull()', function() {
 
-      it('creates a find query taken from a specified table, with a single condition on a column', function() {
+      it('creates a select query taken from a specified table, with a single condition on a column', function() {
         expect(subject.
-          find(['Id', 'FirstName', 'LastName']).
+          select(['Id', 'FirstName', 'LastName']).
           from('Contact').
           where('FirstName').isNull().
           finish()).
@@ -138,9 +159,9 @@ describe('QueryBuilder', function() {
 
     describe('.isNotNull()', function() {
 
-      it('creates a find query taken from a specified table, with a single condition on a column', function() {
+      it('creates a select query taken from a specified table, with a single condition on a column', function() {
         expect(subject.
-          find(['Id', 'FirstName', 'LastName']).
+          select(['Id', 'FirstName', 'LastName']).
           from('Contact').
           where('FirstName').isNotNull().
           finish()).
@@ -151,9 +172,9 @@ describe('QueryBuilder', function() {
 
     describe('.in([0..n])', function() {
 
-      it('creates a find query taken from a specified table, with a single condition on a column', function() {
+      it('creates a select query taken from a specified table, with a single condition on a column', function() {
         expect(subject.
-          find(['Id', 'FirstName', 'LastName']).
+          select(['Id', 'FirstName', 'LastName']).
           from('Contact').
           where('FirstName').in(['Joe', 'John']).
           finish()).
@@ -164,9 +185,9 @@ describe('QueryBuilder', function() {
 
     describe('.limit(n)', function() {
 
-      it('creates a find query taken from a specified table, with a single condition on a column', function() {
+      it('creates a select query taken from a specified table, with a single condition on a column', function() {
         expect(subject.
-          find(['Id', 'FirstName', 'LastName']).
+          select(['Id', 'FirstName', 'LastName']).
           from('Contact').
           where('FirstName').in(['Joe', 'John']).
           limit(10).
@@ -178,9 +199,9 @@ describe('QueryBuilder', function() {
 
     describe('.orderBy([0..n])', function() {
 
-      it('creates a find query taken from a specified table, with a single condition on a column', function() {
+      it('creates a select query taken from a specified table, with a single condition on a column', function() {
         expect(subject.
-          find(['Id', 'FirstName', 'LastName']).
+          select(['Id', 'FirstName', 'LastName']).
           from('Contact').
           where('FirstName').in(['Joe', 'John']).
           orderBy(['FirstName', 'LastName']).
@@ -191,9 +212,9 @@ describe('QueryBuilder', function() {
 
       describe('.orderByAsc([0..n])', function() {
 
-        it('creates a find query taken from a specified table, with a single condition on a column', function() {
+        it('creates a select query taken from a specified table, with a single condition on a column', function() {
           expect(subject.
-            find(['Id', 'FirstName', 'LastName']).
+            select(['Id', 'FirstName', 'LastName']).
             from('Contact').
             where('FirstName').in(['Joe', 'John']).
             orderByAsc(['FirstName', 'LastName']).
@@ -206,9 +227,9 @@ describe('QueryBuilder', function() {
 
       describe('.orderByDesc([0..n])', function() {
 
-        it('creates a find query taken from a specified table, with a single condition on a column', function() {
+        it('creates a select query taken from a specified table, with a single condition on a column', function() {
           expect(subject.
-            find(['Id', 'FirstName', 'LastName']).
+            select(['Id', 'FirstName', 'LastName']).
             from('Contact').
             where('FirstName').in(['Joe', 'John']).
             orderByDesc(['FirstName', 'LastName']).
