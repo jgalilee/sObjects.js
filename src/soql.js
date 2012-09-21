@@ -1,14 +1,14 @@
-var QueryBuilder = function(fields) {
+var SOQL = function(fields) {
   this.query = '';
   return this;
 }
 
-QueryBuilder.prototype._bindSyntax = function(keyword) {
+SOQL.prototype._bindSyntax = function(keyword) {
   this.query += keyword + ' ';
   return this;
 };
 
-QueryBuilder.prototype._bindValues = function(items, seperator) {
+SOQL.prototype._bindValues = function(items, seperator) {
   var parsedValues = '';
   if(undefined === seperator) {
     seperator = ', ';
@@ -26,86 +26,86 @@ QueryBuilder.prototype._bindValues = function(items, seperator) {
   return this._bindSyntax(parsedValues);
 }
 
-QueryBuilder.prototype.select = function(fields) {
+SOQL.prototype.select = function(fields) {
   return this._bindSyntax('SELECT').
     _bindValues(fields);
 }
 
-QueryBuilder.prototype.subSelect = function(func) {
+SOQL.prototype.subSelect = function(func) {
   return this._bindSyntax('(').
-    _bindSyntax(func(new QueryBuilder()).finish()).
+    _bindSyntax(func(new SOQL()).finish()).
     _bindSyntax(')');
 }
 
-QueryBuilder.prototype.from = function(name) {
+SOQL.prototype.from = function(name) {
   return this._bindSyntax('FROM').
     _bindSyntax(name);
 }
 
-QueryBuilder.prototype.where = function(value) {
+SOQL.prototype.where = function(value) {
   return this._bindSyntax('WHERE').
     _bindSyntax(value);
 }
 
-QueryBuilder.prototype.equal = function(value) {
+SOQL.prototype.equal = function(value) {
   return this._bindSyntax('==').
     _bindSyntax(value);
 }
 
-QueryBuilder.prototype.and = function(value) {
+SOQL.prototype.and = function(value) {
   return this._bindSyntax('AND').
     _bindSyntax(value);
 }
 
-QueryBuilder.prototype.or = function(value) {
+SOQL.prototype.or = function(value) {
   return this._bindSyntax('OR').
     _bindSyntax(value);
 }
 
-QueryBuilder.prototype.notEqual = function(value) {
+SOQL.prototype.notEqual = function(value) {
   return this._bindSyntax('!=').
     _bindSyntax(value);
 }
 
-QueryBuilder.prototype.not = function() {
+SOQL.prototype.not = function() {
   return this._bindSyntax('NOT');
 }
 
-QueryBuilder.prototype.isNull = function(value) {
+SOQL.prototype.isNull = function(value) {
   return this._bindSyntax('IS NULL');
 }
 
-QueryBuilder.prototype.isNotNull = function(value) {
+SOQL.prototype.isNotNull = function(value) {
   return this._bindSyntax('IS NOT NULL');
 }
 
-QueryBuilder.prototype.in = function(values) {
+SOQL.prototype.in = function(values) {
   return this._bindSyntax('IN(').
     _bindValues(values).
     _bindSyntax(')');
 }
 
-QueryBuilder.prototype.limit = function(n) {
+SOQL.prototype.limit = function(n) {
   return this._bindSyntax('LIMIT').
     _bindSyntax(n.toString());
 }
 
-QueryBuilder.prototype.orderBy = function(values) {
+SOQL.prototype.orderBy = function(values) {
   return this._bindSyntax('ORDER BY').
     _bindValues(values);
 }
 
-QueryBuilder.prototype.orderByAsc = function(values) {
+SOQL.prototype.orderByAsc = function(values) {
   return this._bindSyntax('ORDER BY ASC').
     _bindValues(values);
 }
 
-QueryBuilder.prototype.orderByDesc = function(values) {
+SOQL.prototype.orderByDesc = function(values) {
   return this._bindSyntax('ORDER BY DESC').
     _bindValues(values);
 }
 
-QueryBuilder.prototype.finish = function(ready) {
+SOQL.prototype.finish = function(ready) {
   var finalQuery = this.query;
   this.query = '';
   while(finalQuery.charAt(finalQuery.length-1) === ' ') {

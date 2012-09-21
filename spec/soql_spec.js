@@ -1,6 +1,6 @@
-describe('QueryBuilder', function() {
+describe('SOQL', function() {
 
-  subject = new QueryBuilder();
+  subject = new SOQL();
 
   describe('.select([0..n])', function() {
 
