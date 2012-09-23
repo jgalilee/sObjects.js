@@ -1,4 +1,4 @@
-describe('SOQL', function() {
+describe('soql.js', function() {
 
   subject = new SOQL();
 

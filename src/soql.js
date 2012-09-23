@@ -1,5 +1,8 @@
-var SOQL = function(fields) {
+var SOQL = function(options) {
   this.query = '';
+  for(var key in options) {
+    this[key] = options[key];
+  }
   return this;
 }
 
