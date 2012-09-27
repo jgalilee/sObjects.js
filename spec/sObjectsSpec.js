@@ -1,4 +1,4 @@
-describe('sObjects.sosl', function() {
+describe('sObjects.js', function() {
 
   beforeEach(function() {
     subject = new SOSL();
