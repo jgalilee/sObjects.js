@@ -18,9 +18,6 @@ sObjectClass = function(sObjects, sObjectSchema) {
   _this._sObjectSchema = sObjectSchema;
   _this._className = '';
   _this._loaded = false;
-  _this._queryBuilder = new SOQL({
-    all: _this.all
-  });
   return _this;
 }
 
@@ -94,11 +91,28 @@ sObjectClass.prototype.className = function() {
  * parses the result into a refined set of objects for the callback method to
  * handle.
  */
-sObjectClass.prototype.create = function(fields, after) {
-  var record = new sObjectRecord(this, fields);
+sObjectClass.prototype.create = function(record, after) {
   this._ajax({
     url: this._generalUrl,
     method: 'POST',
+    payload: this._attributes,
+    success: function() {
+      after();
+    }
+  });
+  return record;
+}
+
+/*
+ * CREATE method in the restufl CRUD endpoints. Posts a set of fields and
+ * parses the result into a refined set of objects for the callback method to
+ * handle.
+ */
+sObjectClass.prototype.read = function(record, after) {
+  var _this = this;
+  this._ajax({
+    url: _this._getSpecificUrlFor(record),
+    method: 'GET',
     payload: this._attributes,
     success: function() {
       after();
@@ -113,7 +127,10 @@ sObjectClass.prototype.create = function(fields, after) {
  * SOQL object.
  */
 sObjectClass.prototype.find = function(fields) {
-  return this._queryBuilder.
+  var _this = this;
+  return (_this._queryBuilder = new SOQL({
+      all: _this._all
+    })).
     select(fields).
     from(this.className());
 }
@@ -122,7 +139,7 @@ sObjectClass.prototype.find = function(fields) {
  * Assistant method to the find method. If called after a query has been
  * constructed it will post the finished result from the SOQL builder attached.
  */
-sObjectClass.prototype.all = function(ready) {
+sObjectClass.prototype._all = function(ready) {
   var _this = this;
   return _this._deferUnlessLoaded(function() {
     _this._ajax({
@@ -140,10 +157,10 @@ sObjectClass.prototype.all = function(ready) {
  * records parses the result back into the obejcts for the callback method to
  * handle.
  */
-sObjectClass.prototype.update = function(sobjects, after) {
-  var record = new sObjectRecord(this, fields);
+sObjectClass.prototype.update = function(record, after) {
+  var _this = this;
   this._ajax({
-    url: this._specificUrl,
+    url: _this._getSpecificUrlFor(record),
     method: 'PATCH',
     payload: this._attributes,
     success: function() {
@@ -157,10 +174,11 @@ sObjectClass.prototype.update = function(sobjects, after) {
  * DELETE method in the restufl CRUD endpoints. DELETES one or more sObject
  * records parses the resulting success of failure and returns it to a callback.
  */
-sObjectClass.prototype.delete = function(sobjects, after) {
+sObjectClass.prototype.delete = function(record, after) {
+  var _this = this;
   var record = new sObjectRecord(this, fields);
   this._ajax({
-    url: this._specificUrl,
+    url: _this._getSpecificUrlFor(record),
     method: 'DELETE',
     success: function() {
       after();

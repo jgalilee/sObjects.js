@@ -14,25 +14,12 @@
 var sObjectRecord = function(sobjclass, attributes) {
   this._class = sobjclass;
   this._is = {
-    saved = false
+    saved: false
   }
   this._attributes = attributes;
-}
-
-/*
- * Provides a method for utilising the values of the record without the extra
- * functionality specified in the record class.
- */
-sObjectRecord.prototype.toJSON = function() {
-  return JSON.parse(this._attributes);
-}
-
-/*
- * Overrides the current toString method to provide a better realistic
- * representation of the object as a string.
- */
-sObjectRecord.prototype.toString = function() {
-  return JSON.stringify(this.toJSON());
+  if(undefined === this._attributes) {
+    this._attributes = {};
+  }
 }
 
 /*
@@ -49,7 +36,7 @@ sObjectRecord.prototype.is = function(key) {
 sObjectRecord.prototype.get = function(keyOrKeys) {
   if(arguments.length == 1) {
     return this._attributes[keyOrKeys];
-  } else(arguments.length > 1) {
+  } else if(arguments.length > 1) {
     var result = {};
     for (var i = arguments.length - 1; i >= 0; i--) {
       var key = arguments[i];
@@ -83,10 +70,16 @@ sObjectRecord.prototype.set = function(keyOrObject, optionalValue) {
  * Updates the record if it has an id.
  * Creates a new record if it does not have an id.
  */
-sObjectRecord.prototype.save = function() {
-  for(var key in this._attributes) {
-    this._attributes[key] = this._attributes[key];
-  }
+sObjectRecord.prototype.save = function(after) {
+  var _this = this;
+  var action = (_this.get('Id') !== undefined) ? 'update' : 'create';
+  _this._class[action](this, function() {
+
+    // TODO: read the information into this record.
+    after(_this);
+
+  });
+  return _this;
 }
 
 /*
@@ -94,12 +87,32 @@ sObjectRecord.prototype.save = function() {
  * values from the Salesforce.com instance and using them instead.
  */
 sObjectRecord.prototype.reload = function(after) {
-  this._ajax({
-    url: this._specificUrl,
-    method: 'GET',
-    success: function() {
-      after();
-    }
-  });
-  return this;
+  var _this = this;
+  if(undefined !== _this.get('Id')) {
+    _this._class.read(_this, function() {
+
+      // TODO: read the information and overwrite the existing attributes.
+      after(_this);
+
+    });
+  } else {
+    throw "Unable to reload non-persisted sObject record."
+  }
+  return _this;
+}
+
+/*
+ * Provides a method for utilising the values of the record without the extra
+ * functionality specified in the record class.
+ */
+sObjectRecord.prototype.toJSON = function() {
+  return JSON.parse(JSON.stringify(this._attributes));
+}
+
+/*
+ * Overrides the current toString method to provide a better realistic
+ * representation of the object as a string.
+ */
+sObjectRecord.prototype.toString = function() {
+  return JSON.stringify(this._attributes);
 }

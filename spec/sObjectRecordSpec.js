@@ -1,109 +1,118 @@
-describe('sObjectClass.js', function() {
+describe('sObjectRecord.js', function() {
 
   beforeEach(function() {
     subject = new sObjectRecord();
-    subject.set('Name', 'Contact')
-    subject.save();
-  });
-
-  describe('._ajax()', function() {
-
-  });
-
-  describe('._deferUnlessLoaded()', function() {
-
+    subject.set('Name', 'Contact');
+    subject.set('FirstName', 'John');
+    subject.set('LastName', 'Smith');
   });
 
   describe('.is()', function() {
-
-  });
-
-  describe('.load()', function() {
-
+    it('returns the internal value of from the is object', function() {
+      expect(subject.is('saved')).toEqual(false);
+    })
   });
 
   describe('.get()', function() {
 
-    it('returns the value of the attribute if it is defined', function() {
-      expect(subject.get('Name')).toEqual('Contact');
+    describe('single values', function() {
+
+      it('returns the value of the attribute if it is defined', function() {
+        expect(subject.get('FirstName')).toEqual('John');
+      });
+
+      it('returns undefined if the attribute is not defined', function() {
+        expect(subject.get('MiddleName')).toBeUndefined();
+      });
+
     });
 
-    it('returns undefined if the attribute is not defined', function() {
-      expect(subject.get('Eman')).toBeUndefined();
+    describe('multiple value', function() {
+
+      it('returns an object with the keys and their values', function() {
+        expect(subject.get('FirstName', 'LastName')).toEqual({
+          FirstName: 'John',
+          LastName: 'Smith'
+        });
+      });
+
     });
 
   });
 
   describe('.set()', function() {
 
-    it('adds the key and value to the set of pending attributes', function() {
-      subject.set('FirstName', 'Jack');
-      expect(subject.get('FirstName')).toEqual('Jack');
+    describe('single values', function() {
+
+      it('adds the key and value to the set of pending attributes', function() {
+        subject.set('FirstName', 'Jack');
+        expect(subject.get('FirstName')).toEqual('Jack');
+      });
+
+    })
+
+    describe('multiple values', function() {
+
+      it('adds the keys and values to the set of pending attributes', function() {
+        subject.set({
+          'FirstName': 'Jack',
+          'LastName': 'Galilee'
+        });
+        expect(subject.get('FirstName')).toEqual('Jack');
+        expect(subject.get('LastName')).toEqual('Galilee');
+      });
+
     });
 
-    it('adds the keys and values to the set of pending attributes', function() {
-      subject.set({
-        'FirstName': 'Jack',
-        'LastName': 'Galilee'
-      });
-      expect(subject.get('FirstName')).toEqual('Jack');
-      expect(subject.get('LastName')).toEqual('Galilee');
+  });
+
+  describe('.save()', function() {
+
+    describe('record does have an id', function() {
+
+    });
+
+    describe('record does not have an id', function() {
+
     });
 
   });
 
   describe('.reload()', function() {
 
-  });
+    describe('record does have an id', function() {
 
-  describe('.find()', function() {
-
-    it('creates a query selecting the set of fields from the class', function() {
-      subject.set('Name', 'Contact')
-      expect(subject.
-        find(['Id', 'FirstName', 'LastName']).
-        finish()).
-      toEqual("SELECT Id, FirstName, LastName FROM Contact")
     });
 
-    it('creates a query selecting the set of fields from the class with a where condition', function() {
-      subject.set('Name', 'Contact');
-      expect(subject.
-        find(['Id', 'FirstName', 'LastName']).
-        where('FirstName').equal('Jack').
-        finish()).
-      toEqual("SELECT Id, FirstName, LastName FROM Contact WHERE FirstName == Jack");
-    });
+    describe('record does not have an id', function() {
 
-    it('creates a query selecting the set of fields from the class with a where condition and a limit', function() {
-      subject.set('Name', 'Contact');
-      expect(subject.
-        find(['Id', 'FirstName', 'LastName']).
-        where('FirstName').isNotNull().
-        limit(10).
-        finish()).
-      toEqual("SELECT Id, FirstName, LastName FROM Contact WHERE FirstName IS NOT NULL LIMIT 10");
+      it('throws an exception', function() {
+        expect(subject.reload()).
+          toThrow("Unable to reload non-persisted sObject record.");
+      })
+
     });
 
   });
 
-  describe('.all()', function() {
+  describe('.toJSON()', function() {
+
+    it('converts the attributes of the object into a JSON object', function() {
+      expect(subject.toJSON()).toEqual({
+        Name: 'Contact',
+        FirstName: 'John',
+        LastName: 'Smith'
+      })
+    });
 
   });
 
-  describe('.save()', function() {
+  describe('.toString()', function() {
 
-  });
-
-  describe('.create()', function() {
-
-  });
-
-  describe('.update()', function() {
-
-  });
-
-  describe('.delete()', function() {
+    it('converts the attributes of the object into a string', function() {
+      expect(subject.toString()).
+        toEqual('{"Name":"Contact","FirstName":"John","LastName":"Smith"}');
+    });
 
   });
 
