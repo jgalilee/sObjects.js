@@ -1,3 +1,10 @@
+/*
+ *  sObjectRecord Specification
+ * ============================================================================
+ * author: Jack Galilee
+ * date: 27th September 2012
+ */
+
 describe('sObjectRecord.js', function() {
 
   beforeEach(function() {
@@ -10,6 +17,20 @@ describe('sObjectRecord.js', function() {
   describe('.is()', function() {
     it('returns the internal value of from the is object', function() {
       expect(subject.is('saved')).toEqual(false);
+    })
+  });
+
+  describe('._isNow()', function() {
+    it('sets the value of the key in the is object to true', function() {
+      subject._isNow('something');
+      expect(subject.is('something')).toEqual(true);
+    })
+  });
+
+  describe('._isNoLonger()', function() {
+    it('sets the value of the key in the is object to true', function() {
+      subject._isNoLonger('something');
+      expect(subject.is('something')).toEqual(false);
     })
   });
 
@@ -53,7 +74,7 @@ describe('sObjectRecord.js', function() {
 
     describe('multiple values', function() {
 
-      it('adds the keys and values to the set of pending attributes', function() {
+      it('adds keys and values to the set of pending attributes', function() {
         subject.set({
           'FirstName': 'Jack',
           'LastName': 'Galilee'
@@ -88,7 +109,7 @@ describe('sObjectRecord.js', function() {
 
       it('throws an exception', function() {
         expect(subject.reload()).
-          toThrow("Unable to reload non-persisted sObject record.");
+          toThrow(new Error("Unable to reload non-persisted sObject record."));
       })
 
     });

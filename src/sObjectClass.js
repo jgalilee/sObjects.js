@@ -4,10 +4,7 @@
  * author: Jack Galilee
  * date: 27th September 2012
  * version: DEVELOPMENT
- */
-
-
-/*
+ * ============================================================================
  * Defines the type sObject schema that will be used to manage the specific type
  * of sObject as defined on the Salesforce.com instance. Each instance contains
  * a schema provided by the instance of sObjects it belongs to.
@@ -16,26 +13,25 @@ sObjectClass = function(sObjects, sObjectSchema) {
   var _this = this;
   _this._sObjects = sObjects;
   _this._sObjectSchema = sObjectSchema;
-  _this._className = '';
-  _this._loaded = false;
+  _this._is = {
+    loaded: false
+  };
   return _this;
 }
 
-/*
- * Utility method to simplify callback to the Salesforce.com instance.
- */
-sObjectClass.prototype._ajax = function(options) {
-  var body = {
-    token: sr.oauthToken,
-    method: options.method,
-    contentType: "application/json",
-    success: options.success
+sObjectClass.prototype._getGeneralUrl = function(types) {
+  return _sObjectSchema.urls.sobject;
+}
+
+sObjectClass.prototype._getSpecificUrlFor = function(types) {
+  console.log('getting specific url for', types);
+  if(undefined !== types['id']) {
+    return _sObjectSchema.urls.sobject + '/' + types['id'];
+  } else if(undefined !== types['record']) {
+    return types['record'].get('attributes').url;
+  } else {
+    throw "sObject has no Id";
   }
-  if(undefined !== options.payload) {
-    body["data"] = JSON.stringify(options.payload);
-  }
-  Sfdc.canvas.client.ajax(options.url, body);
-  return this;
 }
 
 /*
@@ -43,12 +39,18 @@ sObjectClass.prototype._ajax = function(options) {
  * has been loaded for the specific class.
  */
 sObjectClass.prototype._deferUnlessLoaded = function(defer) {
-  if(this.is('loaded') == false) {
-    this.load(defer);
+  var _this = this;
+  if(_this.is('loaded') == false) {
+    _this.load(defer);
   } else {
     defer();
   }
-  return this;
+  return _this;
+}
+
+sObjectClass.prototype.is = function(what) {
+  var _this = this;
+  return _this._is[what];
 }
 
 /*
@@ -56,26 +58,26 @@ sObjectClass.prototype._deferUnlessLoaded = function(defer) {
  * the fields and data.
  */
 sObjectClass.prototype.load = function(ready) {
-  Sfdc.canvas.client.ajax(this._sObjectSchema.urls.describe, {
-    token: this._sObjects._sr.oauthToken,
+  var _this = this;
+  _this._sObjects.ajax({
+    url: this._sObjectSchema.urls.describe,
     method: 'GET',
-    contentType: "application/json",
     success: function(data) {
       var fields = data.payload.fields
-      this.fields = {}
+      _this.fields = {}
       for (var i = fields.length - 1; i >= 0; i--) {
         var field = fields[i];
         if(undefined !== field.name) {
-          this.fields[field.name] = field;
+          _this.fields[field.name] = field;
         }
       };
-      this._is['loaded'] = true;
+      _this._is['loaded'] = true;
       if(undefined !== ready) {
-        ready(this);
+        ready(_this);
       }
     }
   });
-  return this;
+  return _this;
 }
 
 /*
@@ -83,43 +85,9 @@ sObjectClass.prototype.load = function(ready) {
  * Salesforce.com instance 'Name' field.
  */
 sObjectClass.prototype.className = function() {
-  return this._className;
+  return this._sObjectSchema.name;
 }
 
-/*
- * CREATE method in the restufl CRUD endpoints. Posts a set of fields and
- * parses the result into a refined set of objects for the callback method to
- * handle.
- */
-sObjectClass.prototype.create = function(record, after) {
-  this._ajax({
-    url: this._generalUrl,
-    method: 'POST',
-    payload: this._attributes,
-    success: function() {
-      after();
-    }
-  });
-  return record;
-}
-
-/*
- * CREATE method in the restufl CRUD endpoints. Posts a set of fields and
- * parses the result into a refined set of objects for the callback method to
- * handle.
- */
-sObjectClass.prototype.read = function(record, after) {
-  var _this = this;
-  this._ajax({
-    url: _this._getSpecificUrlFor(record),
-    method: 'GET',
-    payload: this._attributes,
-    success: function() {
-      after();
-    }
-  });
-  return record;
-}
 
 /*
  * READ method in the restful endpoints. Constructs the start of a query for the
@@ -128,28 +96,73 @@ sObjectClass.prototype.read = function(record, after) {
  */
 sObjectClass.prototype.find = function(fields) {
   var _this = this;
-  return (_this._queryBuilder = new SOQL({
-      all: _this._all
-    })).
-    select(fields).
-    from(this.className());
+  var queryBuilder = new SOQL({
+    all: function(ready) {
+      _this._deferUnlessLoaded(function() {
+        _this._sObjects.ajax({
+          url: (_this._sObjects._urls.query + '?q=' + queryBuilder.finish()),
+          method: 'GET',
+          success: function(data, status) {
+            var results = [];
+            var records = data.payload.records;
+            for (var i = records.length - 1; i >= 0; i--) {
+              results.push(new sObjectRecord(_this, records[i]));
+            };
+            ready(results, data, status);
+          }
+        });
+      });
+    }
+  });
+  return queryBuilder.select(fields).from(this.className());
 }
 
 /*
- * Assistant method to the find method. If called after a query has been
- * constructed it will post the finished result from the SOQL builder attached.
+ *  Instantiates a non-persisted sObjectClass record.
  */
-sObjectClass.prototype._all = function(ready) {
+sObjectClass.prototype.build = function(attributes) {
   var _this = this;
-  return _this._deferUnlessLoaded(function() {
-    _this._ajax({
-      url: (_this._sObjects._urls.query + '?q=' + _this._queryBuilder.finish()),
-      method: 'GET',
-      success: function(data) {
-        ready(data.payload.records);
-      }
-    });
+  return new sObjectRecord(_this, attributes);
+}
+
+/*
+ * CREATE method in the restufl CRUD endpoints. Posts a set of fields and
+ * parses the result into a refined set of objects for the callback method to
+ * handle.
+ */
+sObjectClass.prototype.create = function(attributes, after) {
+  var _this = this;
+  var record = new sObjectRecord(_this);
+  this._sObjects.ajax({
+    url: this._generalUrl,
+    method: 'POST',
+    payload: this._attributes,
+    success: function(data) {
+      // TODO: Write the Id into the new record, and reload it.
+      after(data);
+    }
   });
+  return record;
+}
+
+/*
+ * CREATE method in the restufl CRUD endpoints. Posts a set of fields and
+ * parses the result into a refined set of objects for the callback method to
+ * handle.
+ */
+sObjectClass.prototype.read = function(id, after) {
+  var _this = this;
+  var record = new sObjectRecord(_this);
+  this._sObjects.ajax({
+    url: _this._getSpecificUrlFor({ record: record }),
+    method: 'GET',
+    payload: this._attributes,
+    success: function(data) {
+      // TODO: Write the attributes into the returned record;
+      after(data);
+    }
+  });
+  return record;
 }
 
 /*
@@ -157,14 +170,16 @@ sObjectClass.prototype._all = function(ready) {
  * records parses the result back into the obejcts for the callback method to
  * handle.
  */
-sObjectClass.prototype.update = function(record, after) {
+sObjectClass.prototype.update = function(id, attributes, after) {
   var _this = this;
-  this._ajax({
-    url: _this._getSpecificUrlFor(record),
+  var record = new sObjectRecord(_this);
+  _this._sObjects.ajax({
+    url: _this._getSpecificUrlFor({ id: id }),
     method: 'PATCH',
-    payload: this._attributes,
-    success: function() {
-      after();
+    payload: attributes,
+    success: function(data) {
+      // TODO: Write the attributes into the returned record;
+      after(data);
     }
   });
   return record;
@@ -174,14 +189,13 @@ sObjectClass.prototype.update = function(record, after) {
  * DELETE method in the restufl CRUD endpoints. DELETES one or more sObject
  * records parses the resulting success of failure and returns it to a callback.
  */
-sObjectClass.prototype.delete = function(record, after) {
+sObjectClass.prototype.delete = function(id, after) {
   var _this = this;
-  var record = new sObjectRecord(this, fields);
-  this._ajax({
-    url: _this._getSpecificUrlFor(record),
+  _this._sObjects.ajax({
+    url: _this._getSpecificUrlFor({ id: id }),
     method: 'DELETE',
-    success: function() {
-      after();
+    success: function(data) {
+      after(data);
     }
   });
   return record;

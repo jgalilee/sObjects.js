@@ -23,7 +23,7 @@ The sobjects.min.js file will now be in the current directory.
 
 ## Installation
 
-Using the library with a Ruby on Rails and Java application is as easy as adding it to the javascript assets, and making sure that is included correctly.
+Installing the library into a Ruby on Rails or Java application is as easy as adding it to the javascript assets, and making sure that is included correctly.
 
 ## Usage
 

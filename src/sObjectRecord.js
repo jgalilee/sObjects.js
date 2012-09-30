@@ -4,10 +4,7 @@
  * author: Jack Galilee
  * date: 27th September 2012
  * version: DEVELOPMENT
- */
-
-
-/*
+ * ============================================================================
  * Defines the tyoe of sObject class that the record is of, if any changes have
  * been saved on the server, and the attributes that it has by default.
  */
@@ -23,28 +20,35 @@ var sObjectRecord = function(sobjclass, attributes) {
 }
 
 /*
- * Returns the current is value for the key provided.
- * Note that 'is values' are never attempted to be persisted on the server.
+ * Returns the is value for the key provided.
+ * Note: that 'is values' are never attempted to be persisted on the server.
  */
-sObjectRecord.prototype.is = function(key) {
-  return this._is[key];
+sObjectRecord.prototype.is = function(key, value) {
+  var _this = this;
+  if(undefined !== value) {
+    return _this._is[key] = value;
+  }
+  return _this._is[key];
 }
 
 /*
  * Returns the current attribute value for the key provided.
  */
 sObjectRecord.prototype.get = function(keyOrKeys) {
+  var _this = this;
   if(arguments.length == 1) {
-    return this._attributes[keyOrKeys];
+    return _this._attributes[keyOrKeys];
   } else if(arguments.length > 1) {
     var result = {};
     for (var i = arguments.length - 1; i >= 0; i--) {
       var key = arguments[i];
-      if(this._attributes[key] !== undefined) {
-        result[key] = this._attributes[key];
+      if(_this._attributes[key] !== undefined) {
+        result[key] = _this._attributes[key];
       }
     }
     return result;
+  } else {
+    return JSON.parse(JSON.stringify(this._attributes));
   }
 }
 
@@ -56,11 +60,14 @@ sObjectRecord.prototype.get = function(keyOrKeys) {
  * value set. e.g. record.set({ 'key1': 'value1', 'key2': 'value2' })
  */
 sObjectRecord.prototype.set = function(keyOrObject, optionalValue) {
+  var _this = this;
   if(optionalValue !== undefined) {
     this._attributes[keyOrObject] = optionalValue;
+    _this.is('saved', false);
   } else {
     for(key in keyOrObject) {
       this._attributes[key] = keyOrObject[key];
+      _this.is('saved', false);
     }
   }
   return this;
@@ -73,11 +80,25 @@ sObjectRecord.prototype.set = function(keyOrObject, optionalValue) {
 sObjectRecord.prototype.save = function(after) {
   var _this = this;
   var action = (_this.get('Id') !== undefined) ? 'update' : 'create';
-  _this._class[action](this, function() {
+  _this._class[action](_this._attributes, function(data) {
 
-    // TODO: read the information into this record.
-    after(_this);
+    /*
+     * Salesforce only returns the Id for the object on a POST.
+     * Defer the after function and reload the object. Since we've
+     * sent the object for the create it will contain the attributes
+     * values that were sent to start with.
+     */
+    if(data.status == 200) {
+      if('create' === action) {
+          _this.set('Id', data.payload.id).reload(after);
 
+      } else if('update' === action) {
+        // TODO: read the information from the UPDATE request into the record.
+        _this.set(data.payload);
+        _this.is('saved', true)
+        after(_this, data);
+      }
+    }
   });
   return _this;
 }
@@ -89,30 +110,14 @@ sObjectRecord.prototype.save = function(after) {
 sObjectRecord.prototype.reload = function(after) {
   var _this = this;
   if(undefined !== _this.get('Id')) {
-    _this._class.read(_this, function() {
-
-      // TODO: read the information and overwrite the existing attributes.
-      after(_this);
-
+    _this._class.read(_this.get('Id'), function(data) {
+      _this._attributes = {};
+      _this.set(data.payload);
+      _this.is('saved', true)
+      after(_this, data, status);
     });
   } else {
-    throw "Unable to reload non-persisted sObject record."
+    throw new Error("Unable to reload non-persisted sObject record.");
   }
   return _this;
-}
-
-/*
- * Provides a method for utilising the values of the record without the extra
- * functionality specified in the record class.
- */
-sObjectRecord.prototype.toJSON = function() {
-  return JSON.parse(JSON.stringify(this._attributes));
-}
-
-/*
- * Overrides the current toString method to provide a better realistic
- * representation of the object as a string.
- */
-sObjectRecord.prototype.toString = function() {
-  return JSON.stringify(this._attributes);
 }
