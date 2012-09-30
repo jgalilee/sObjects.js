@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "name": "sObjects.js",
+  "dependencies": {
+    "jake-uglify": ">= 1.0.1"
+  }
+}

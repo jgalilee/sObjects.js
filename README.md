@@ -1,8 +1,31 @@
-#sObjects.js
+# sObjects.js
 
 Currently there exists very little documentation about how to use the new Force.com canvas javascript library. This library hopes to remove the difficulty of locating these resources and to provide a friendly wrapper for the existing library making it easier to use and bringing it inline with modern javascript libraries.
 
+## Building
+
+Building the sObjects.js library requires nodejs, npm and a global installation of the npm jake package.
+
+git clone this library and install the node dependencies.
+
+````shell
+sudo npm install dependencies
+````
+
+To build the sObjects.js library run jake
+
+````shell
+jake
+````
+
+The sobjects.min.js file will now be in the current directory.
+
+
 ## Installation
+
+Using the library with a Ruby on Rails and Java application is as easy as adding it to the javascript assets, and making sure that is included correctly.
+
+## Usage
 
 Using the sObjects library is simple. Examples for the Force.com canvas require you to setup the request object as follows.
 
@@ -11,7 +34,7 @@ Sfdc.canvas(function() {
   var sr = JSON.parse('<%=signedRequestJson%>');
   Sfdc.canvas.oauth.token(sr.oauthToken);
 
-  // Code using the canas goes here.
+  // Code using the canvas goes here.
 
 });
 ````
@@ -23,7 +46,8 @@ Sfdc.canvas(function() {
   var sObjects = new sObjects();
   sObjects.instantiate('<%= raw @canvasRequestJson %>', function() {
 
-    // Code utilising sObjects goes here.
+    // Code using canvas goes here.
+    // Code using sObjects goes here.
 
   });
 });
@@ -34,7 +58,6 @@ sObjects does not mutate the existing library which can still be accessed with .
 ````
 sObjects.getBase() // return result of var sr = JSON.parse('<%=signedRequestJson%>');
 ````
-
 
 ### Accessing sObjects
 
