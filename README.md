@@ -25,7 +25,11 @@ The sobjects.min.js file will now be in the current directory.
 
 Installing the library into a Ruby on Rails or Java application is as easy as adding it to the javascript assets, and making sure that is included correctly.
 
-## Usage
+### Usage
+
+Detailed usage can be found at the sObjects Wiki, [located here.](https://github.com/jgalilee/sObjects.js/wiki)
+
+## Overview
 
 Using the sObjects library is simple. Examples for the Force.com canvas require you to setup the request object as follows.
 
