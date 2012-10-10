@@ -1,6 +1,15 @@
+/*
+ * SOQL Specification
+ * ============================================================================
+ * author: Jack Galilee
+ * ============================================================================
+ */
+
 describe('soql.js', function() {
 
-  subject = new SOQL();
+  beforeEach(function() {
+    subject = new SOQL();
+  });
 
   describe('.select([0..n])', function() {
 

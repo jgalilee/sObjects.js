@@ -1,13 +1,11 @@
 /*
- *  sObjects
+ * sObjects
  * ============================================================================
  * author: Jack Galilee
- * date: 27th September 2012
- * version: DEVELOPMENT
  * ============================================================================
- *
- *
- *
+ * Core library. Constructs the classes by requesting and interpretings the
+ * returned information. Provides helper functions for sObject Classes allowing
+ * them to interact with the Force.com canvas.
  */
 var sObjects = function(requestJSON, ready) {
   var _this = this;

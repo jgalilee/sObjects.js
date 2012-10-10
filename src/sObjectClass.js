@@ -1,9 +1,7 @@
 /*
- *  sObjectClass
+ * sObjectClass
  * ============================================================================
  * author: Jack Galilee
- * date: 27th September 2012
- * version: DEVELOPMENT
  * ============================================================================
  * Defines the type sObject schema that will be used to manage the specific type
  * of sObject as defined on the Salesforce.com instance. Each instance contains
@@ -19,18 +17,25 @@ sObjectClass = function(sObjects, sObjectSchema) {
   return _this;
 }
 
+/*
+ * Simply returns the generic url as provided by the Force.com api for the
+ * sObject type. Example 'api.force.com/sobjects/Contact/'.
+ */
 sObjectClass.prototype._getGeneralUrl = function(types) {
   return _sObjectSchema.urls.sobject;
 }
 
+/*
+ * 
+ */
 sObjectClass.prototype._getSpecificUrlFor = function(types) {
   console.log('getting specific url for', types);
   if(undefined !== types['id']) {
     return _sObjectSchema.urls.sobject + '/' + types['id'];
   } else if(undefined !== types['record']) {
-    return types['record'].get('attributes').url;
+    return types['record'].url();
   } else {
-    throw "sObject has no Id";
+    throw "Unable to interpret URL for Id";
   }
 }
 
@@ -88,7 +93,6 @@ sObjectClass.prototype.className = function() {
   return this._sObjectSchema.name;
 }
 
-
 /*
  * READ method in the restful endpoints. Constructs the start of a query for the
  * sObject, given a set of fields. Dependant on the interface provided by the
@@ -118,11 +122,21 @@ sObjectClass.prototype.find = function(fields) {
 }
 
 /*
- *  Instantiates a non-persisted sObjectClass record.
+ * Instantiates one or more non-persisted sObjectClass record. If an array of
+ * attributes is provided an sObjectRecord is created for each and returned.
+ * If only a singly anonymous object containing the attributes is provided,
+ * only it is returned.
  */
 sObjectClass.prototype.build = function(attributes) {
   var _this = this;
-  return new sObjectRecord(_this, attributes);
+  if(Object.prototype.toString.call(attributes) === '[object Array]') {
+    var result;
+    for (var i = attributes.length - 1; i >= 0; i--) {
+      result.push(new sObjectRecord(_this, attributes[i]));
+    };
+  } else {
+    return new sObjectRecord(_this, attributes);
+  }
 }
 
 /*
@@ -138,7 +152,7 @@ sObjectClass.prototype.create = function(attributes, after) {
     method: 'POST',
     payload: this._attributes,
     success: function(data) {
-      // TODO: Write the Id into the new record, and reload it.
+      record.set(data.payload);
       after(data);
     }
   });
@@ -158,7 +172,7 @@ sObjectClass.prototype.read = function(id, after) {
     method: 'GET',
     payload: this._attributes,
     success: function(data) {
-      // TODO: Write the attributes into the returned record;
+      record.set(data.payload);
       after(data);
     }
   });
@@ -178,7 +192,7 @@ sObjectClass.prototype.update = function(id, attributes, after) {
     method: 'PATCH',
     payload: attributes,
     success: function(data) {
-      // TODO: Write the attributes into the returned record;
+      record.set(data.payload);
       after(data);
     }
   });
@@ -186,7 +200,7 @@ sObjectClass.prototype.update = function(id, attributes, after) {
 }
 
 /*
- * DELETE method in the restufl CRUD endpoints. DELETES one or more sObject
+ * DELETE method in the restful CRUD endpoints. DELETES one or more sObject
  * records parses the resulting success of failure and returns it to a callback.
  */
 sObjectClass.prototype.delete = function(id, after) {

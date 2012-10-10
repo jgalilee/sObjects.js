@@ -1,8 +1,8 @@
 /*
- *  sObjectRecord Specification
+ * sObjectRecord Specification
  * ============================================================================
  * author: Jack Galilee
- * date: 27th September 2012
+ * ============================================================================
  */
 
 describe('sObjectRecord.js', function() {

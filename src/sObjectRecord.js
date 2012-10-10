@@ -1,11 +1,9 @@
 /*
- *  sObjectRecord
+ * sObjectRecord
  * ============================================================================
  * author: Jack Galilee
- * date: 27th September 2012
- * version: DEVELOPMENT
  * ============================================================================
- * Defines the tyoe of sObject class that the record is of, if any changes have
+ * Defines the type of sObject class that the record is of, if any changes have
  * been saved on the server, and the attributes that it has by default.
  */
 var sObjectRecord = function(sobjclass, attributes) {
@@ -53,6 +51,20 @@ sObjectRecord.prototype.get = function(keyOrKeys) {
 }
 
 /*
+ * Check if the object has an Id. If it does then attempt to get the specific
+ * URL for the object. Otherwise throw an error explaining why one could not
+ * be returned. If an object has an id the Force.com api also provides a url
+ * for the object in a returned JSON key value pair named 'attributes'.
+ */
+sObjectRecord.prototype.url = function() {
+  if(undefined !== _this.get('Id')) {
+    return _this.get('attributes').url);
+  } else {
+    throw "sObject has no specific url, since it has no Id.";
+  }
+}
+
+/*
  * Sets the key, value pair in the attributes object if given one key, value
  * pair. e.g. record.set('key', 'value');
  *
@@ -93,7 +105,6 @@ sObjectRecord.prototype.save = function(after) {
           _this.set('Id', data.payload.id).reload(after);
 
       } else if('update' === action) {
-        // TODO: read the information from the UPDATE request into the record.
         _this.set(data.payload);
         _this.is('saved', true)
         after(_this, data);
