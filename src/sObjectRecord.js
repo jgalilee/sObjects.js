@@ -91,26 +91,26 @@ sObjectRecord.prototype.set = function(keyOrObject, optionalValue) {
  */
 sObjectRecord.prototype.save = function(after) {
   var _this = this;
-  var action = (_this.get('Id') !== undefined) ? 'update' : 'create';
-  _this._class[action](_this._attributes, function(data) {
-
-    /*
-     * Salesforce only returns the Id for the object on a POST.
-     * Defer the after function and reload the object. Since we've
-     * sent the object for the create it will contain the attributes
-     * values that were sent to start with.
-     */
-    if(data.status == 200) {
-      if('create' === action) {
-          _this.set('Id', data.payload.id).reload(after);
-
-      } else if('update' === action) {
-        _this.set(data.payload);
-        _this.is('saved', true)
-        after(_this, data);
+  if(undefined !== _this.get('Id')) {
+    _this._class.update(_this, function(data) {
+      _this.set(data.payload);
+      _this.is('saved', true)
+      after(_this, data);
+    });
+  } else {
+    _this._class.create(_this, function(data) {
+      /*
+       * Salesforce only returns the Id for the object on a POST.
+       * Defer the after function and reload the object. Since we've
+       * sent the object for the create it will contain the attributes
+       * values that were sent to start with.
+       */
+      if(data.status == 200) {
+        _this.set('Id', data.payload.id).reload(after);
       }
-    }
-  });
+      after(_this, data);
+    });
+  }
   return _this;
 }
 
@@ -121,7 +121,7 @@ sObjectRecord.prototype.save = function(after) {
 sObjectRecord.prototype.reload = function(after) {
   var _this = this;
   if(undefined !== _this.get('Id')) {
-    _this._class.read(_this.get('Id'), function(data) {
+    _this._class.read(_this, function(data) {
       _this._attributes = {};
       _this.set(data.payload);
       _this.is('saved', true)

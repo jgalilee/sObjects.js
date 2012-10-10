@@ -18,28 +18,6 @@ sObjectClass = function(sObjects, sObjectSchema) {
 }
 
 /*
- * Simply returns the generic url as provided by the Force.com api for the
- * sObject type. Example 'api.force.com/sobjects/Contact/'.
- */
-sObjectClass.prototype._getGeneralUrl = function(types) {
-  return _sObjectSchema.urls.sobject;
-}
-
-/*
- * 
- */
-sObjectClass.prototype._getSpecificUrlFor = function(types) {
-  console.log('getting specific url for', types);
-  if(undefined !== types['id']) {
-    return _sObjectSchema.urls.sobject + '/' + types['id'];
-  } else if(undefined !== types['record']) {
-    return types['record'].url();
-  } else {
-    throw "Unable to interpret URL for Id";
-  }
-}
-
-/*
  * Utility method to defer a callback until after the schema information
  * has been loaded for the specific class.
  */
@@ -53,6 +31,18 @@ sObjectClass.prototype._deferUnlessLoaded = function(defer) {
   return _this;
 }
 
+/*
+ * Simply returns the generic url as provided by the Force.com api for the
+ * sObject type. Example 'api.force.com/sobjects/Contact/'.
+ */
+sObjectClass.prototype.url = function(types) {
+  return _sObjectSchema.urls.sobject;
+}
+
+/*
+ * Simply returns the boolean value of a state the class is in.
+ * Example: if the class has been loaded or not; .is('loaded'); // false
+ */
 sObjectClass.prototype.is = function(what) {
   var _this = this;
   return _this._is[what];
@@ -129,14 +119,15 @@ sObjectClass.prototype.find = function(fields) {
  */
 sObjectClass.prototype.build = function(attributes) {
   var _this = this;
+  var results = [];
   if(Object.prototype.toString.call(attributes) === '[object Array]') {
-    var result;
     for (var i = attributes.length - 1; i >= 0; i--) {
-      result.push(new sObjectRecord(_this, attributes[i]));
-    };
+      results.push(new sObjectRecord(_this, attributes[i]));
+    }
   } else {
-    return new sObjectRecord(_this, attributes);
+    result = new sObjectRecord(_this, attributes);
   }
+  return results;
 }
 
 /*
@@ -144,13 +135,12 @@ sObjectClass.prototype.build = function(attributes) {
  * parses the result into a refined set of objects for the callback method to
  * handle.
  */
-sObjectClass.prototype.create = function(attributes, after) {
+sObjectClass.prototype.create = function(record, after) {
   var _this = this;
-  var record = new sObjectRecord(_this);
-  this._sObjects.ajax({
-    url: this._generalUrl,
+  _this._sObjects.ajax({
+    url: this.url(),
     method: 'POST',
-    payload: this._attributes,
+    payload: record.get(),
     success: function(data) {
       record.set(data.payload);
       after(data);
@@ -164,13 +154,11 @@ sObjectClass.prototype.create = function(attributes, after) {
  * parses the result into a refined set of objects for the callback method to
  * handle.
  */
-sObjectClass.prototype.read = function(id, after) {
+sObjectClass.prototype.read = function(record, after) {
   var _this = this;
-  var record = new sObjectRecord(_this);
-  this._sObjects.ajax({
-    url: _this._getSpecificUrlFor({ record: record }),
+  _this._sObjects.ajax({
+    url: record.url(),
     method: 'GET',
-    payload: this._attributes,
     success: function(data) {
       record.set(data.payload);
       after(data);
@@ -184,13 +172,12 @@ sObjectClass.prototype.read = function(id, after) {
  * records parses the result back into the obejcts for the callback method to
  * handle.
  */
-sObjectClass.prototype.update = function(id, attributes, after) {
+sObjectClass.prototype.update = function(record, after) {
   var _this = this;
-  var record = new sObjectRecord(_this);
   _this._sObjects.ajax({
-    url: _this._getSpecificUrlFor({ id: id }),
+    url: record.url(),
     method: 'PATCH',
-    payload: attributes,
+    payload: record.get(),
     success: function(data) {
       record.set(data.payload);
       after(data);
@@ -203,10 +190,10 @@ sObjectClass.prototype.update = function(id, attributes, after) {
  * DELETE method in the restful CRUD endpoints. DELETES one or more sObject
  * records parses the resulting success of failure and returns it to a callback.
  */
-sObjectClass.prototype.delete = function(id, after) {
+sObjectClass.prototype.delete = function(record, after) {
   var _this = this;
   _this._sObjects.ajax({
-    url: _this._getSpecificUrlFor({ id: id }),
+    url: record.url(),
     method: 'DELETE',
     success: function(data) {
       after(data);
