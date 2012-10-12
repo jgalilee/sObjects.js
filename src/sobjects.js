@@ -46,8 +46,8 @@ sObjects.prototype.ajax = function(options) {
  */
 sObjects.prototype.loadUrls = function(ready) {
   var _this = this;
-  _this._baseUrl = _this._sr.instanceUrl;
   _this._urls = {};
+  _this._baseUrl = _this._sr.instanceUrl;
   var links = _this._sr.context.links;
   for(var key in links) {
     _this._urls[key.substr(0, key.length - 3)] = (_this._baseUrl + links[key]);

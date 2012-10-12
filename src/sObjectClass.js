@@ -7,6 +7,7 @@
  * of sObject as defined on the Salesforce.com instance. Each instance contains
  * a schema provided by the instance of sObjects it belongs to.
  */
+
 sObjectClass = function(sObjects, sObjectSchema) {
   var _this = this;
   _this._sObjects = sObjects;
@@ -35,7 +36,7 @@ sObjectClass.prototype._deferUnlessLoaded = function(defer) {
  * Simply returns the generic url as provided by the Force.com api for the
  * sObject type. Example 'api.force.com/sobjects/Contact/'.
  */
-sObjectClass.prototype.url = function(types) {
+sObjectClass.prototype.url = function() {
   return _sObjectSchema.urls.sobject;
 }
 
