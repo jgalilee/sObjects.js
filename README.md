@@ -27,6 +27,10 @@ Installing the library into a Ruby on Rails or Java application is as easy as ad
 
 ## Usage
 
+Detailed usage can be found at the [sObjects Wiki.](https://github.com/jgalilee/sObjects.js/wiki)
+
+## Overview
+
 Using the sObjects library is simple. Examples for the Force.com canvas require you to setup the request object as follows.
 
 ````js
