@@ -8,6 +8,19 @@
 describe('sObjectClass.js', function() {
 
   beforeEach(function() {
+    var stubs = {
+      sObjects: {
+        ajax: {
+
+        }
+      },
+      schemaStub: {
+        name: 'Contact',
+        urls: {
+          sobject: 'http://sobject.class/'
+        }
+      }
+    }
     subject = new sObjectClass(stubs.sObjects, stubs.schemaStub);
   });
 
@@ -20,7 +33,7 @@ describe('sObjectClass.js', function() {
       });
 
       it('calls the defered function after the load function', function() {
-        
+
       });
 
     })
@@ -32,7 +45,7 @@ describe('sObjectClass.js', function() {
       });
 
       it('calls the defered function after the load function', function() {
-        
+
       });
 
     });
@@ -40,19 +53,19 @@ describe('sObjectClass.js', function() {
   });
 
   describe('.url()', function() {
-    
+
     it('returns the url as specified by the schema object', function() {
       expect(subject.url()).toEqual("http://sobject.class/");
-    }); 
+    });
 
   });
 
   describe('.is()', function() {
 
     it('returns value for provided key in the private is object', function() {
-
+      expect(subject.is('loaded')).toBeDefined();
     });
-    
+
   });
 
   describe('.load()', function() {
@@ -76,15 +89,15 @@ describe('sObjectClass.js', function() {
   });
 
   describe('.className()', function() {
-    
-    it('returns the name of the provided schema object', function() {
 
+    it('returns the name of the provided schema object', function() {
+      expect(subject.className()).toEqual('Contact');
     });
 
   });
 
   describe('.find()', function() {
-    
+
     it('returns a SOQL builder', function() {
 
     });
@@ -100,7 +113,7 @@ describe('sObjectClass.js', function() {
   });
 
   describe('.build()', function() {
-    
+
     describe('one set of attributes', function() {
 
       it('returns a new record', function() {

@@ -37,7 +37,8 @@ sObjectClass.prototype._deferUnlessLoaded = function(defer) {
  * sObject type. Example 'api.force.com/sobjects/Contact/'.
  */
 sObjectClass.prototype.url = function() {
-  return _sObjectSchema.urls.sobject;
+  var _this = this;
+  return _this._sObjectSchema.urls.sobject;
 }
 
 /*

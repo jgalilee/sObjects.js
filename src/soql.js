@@ -136,7 +136,7 @@ SOQL.prototype.isNotNull = function(value) {
 }
 
 /*
- * Binds an IN keyword, and a comma seperated list of values between brackets 
+ * Binds an IN keyword, and a comma seperated list of values between brackets
  * to the query.
  */
 SOQL.prototype.in = function(values) {
